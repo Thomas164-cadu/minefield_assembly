@@ -69,10 +69,17 @@ continua:
 	mul t2, s7, s0 # t2 = s7 * s0 / t2 = 4 * size / 4 * 64 = 256
 	add t2, t2, s6 # t2 = memIni + 256
 	add t6, s6, zero # t6 = memIni
+	la s9, indices
+	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
+	add s8, s8, s9 # t3 = memIni + 24
 for_mostrar_matriz:
 	beq t6, t2, fim_for_mostrar_matriz # if (memIni = t2)
 	mul t3, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
 	add t3, t3, t6 # t3 = memIni + 24
+	li a7, 1
+	lw a0, (s9)
+	ecall
+	add s9, s9, s7
 for_dentro_mostrar_matriz:
 	beq t6, t3, fim_for_dentro_mostrar_matriz
 	li a7, 4
