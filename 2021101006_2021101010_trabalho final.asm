@@ -1,6 +1,7 @@
 	.data
 menu:		.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
 inputFail:	.asciz "\nO valor selecionado n�o existe, favor imprmir novamente\n"
+indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
 matriz:		.word 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9
 cerquilha:	.asciz "#"
 quebra_linha: .asciz "\n"
@@ -49,8 +50,21 @@ carregar_dados_doze:
 	li t0, 12
 	mul s0, t0, t0
 	ret
-
 mostrar_matriz:
+	la s9, indices
+	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
+	add s8, s8, s9 # t3 = memIni + 24
+for_mostrar_index:
+	beq s9, s8, continua
+	li a7, 1
+	lw a0, (s9)
+	ecall
+	add s9, s9, s7
+	j for_mostrar_index
+continua:
+	li a7, 4
+	la a0, quebra_linha
+	ecall
 	# carrega o ultimo endereco de memoria do vet em t2
 	mul t2, s7, s0 # t2 = s7 * s0 / t2 = 4 * size / 4 * 64 = 256
 	add t2, t2, s6 # t2 = memIni + 256
