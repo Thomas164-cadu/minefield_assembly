@@ -1,45 +1,38 @@
-	.data
-menu:		.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
-inputFail:	.asciz "\nO valor selecionado n�o existe, favor imprmir novamente\n"
-indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
+		.data
+menu:			.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
+inputFail:		.asciz "\nO valor selecionado n�o existe, favor imprmir novamente\n"
+indices:		.word 0,1,2,3,4,5,6,7,8,9,0,1
 interface:		.word 5,10,10,10,3,10,10,10,10,10,10,10,10,0,0,10,10,10,10,10,10,10,10,10,10,1,10,-4,10,10,10,9,10,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
-cerquilha:	.asciz "#"
-quebra_linha: .asciz "\n"
-asterisco:	.asciz "*"
-flag:	.asciz "F"
-	.text
-main:
-	la s6, interface # carrega endereço da matriz em s6
-	li s7, 4 # carrega imediato 4 em s7
-	jal escolher_tabuleiro # chama a escolha da matriz e salva em s0 o tamanho de posicoes do vet e em t0 o tamanho do lado da matriz
-	jal mostra_campo # mostra a matriz de acordo com o tamanho escolhido
-	nop # encerra o programa
+cerquilha:		.asciz "#"
+quebra_linha:		.asciz "\n"
+asterisco:		.asciz "*"
+flag:			.asciz "F"
 
-# escolher matriz, talvez mudar
+		.text
+main:
+	la s6, interface 
+	li s7, 4 
+	jal escolher_tabuleiro 
+	jal mostra_campo 
+	li a7, 10   # chamada de sistema para encerrar programa
+	ecall
 escolher_tabuleiro:
-	# O 4 representa o indíce do tipo de comando de impressão salvo no a7 
-	# Depois o a0 receba o endereço de memória da string e o sistema imprima no console
 	li	a7, 4
 	la	a0, menu
 	ecall
-	# Aqui segue a mesma lógica, o número 5 representa um comando para ler o input do usuário
 	li	a7, 5
 	ecall
-	# O valor a retornado é armazenado no temporário a0, passamos ele para s0
 	mv 	s0, a0
-
-	# Verificando se o input corresponde aos valores fornecidos
 	li	t1, 1
 	li	t2, 2
 	li	t3, 3
-	beq	s0, t1, carregar_dados_oito # salva o size em s0 e da ret
-	beq	s0, t2, carregar_dados_dez # salva o size em s0 e da ret
-	beq	s0, t3, carregar_dados_doze # salva o size em s0 e da ret
+	beq	s0, t1, carregar_dados_oito
+	beq	s0, t2, carregar_dados_dez
+	beq	s0, t3, carregar_dados_doze
 	li	a7, 4
 	la	a0, inputFail
 	ecall
 	j escolher_tabuleiro
-	
 carregar_dados_oito: 
 	li t0, 8
 	mul s0, t0, t0
@@ -54,8 +47,8 @@ carregar_dados_doze:
 	ret
 mostra_campo:
 	la s9, indices
-	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
-	add s8, s8, s9 # t3 = memIni + 24
+	mul s8, s7, t0 
+	add s8, s8, s9
 for_mostrar_index:
 	beq s9, s8, continua
 	li a7, 1
@@ -67,36 +60,31 @@ continua:
 	li a7, 4
 	la a0, quebra_linha
 	ecall
-	# carrega o ultimo endereco de memoria do vet em t2
-	mul t2, s7, s0 # t2 = s7 * s0 / t2 = 4 * size / 4 * 64 = 256
-	add t2, t2, s6 # t2 = memIni + 256
-	add t6, s6, zero # t6 = memIni
+	mul t2, s7, s0 
+	add t2, t2, s6 
+	add t6, s6, zero 
 	la s9, indices
-	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
-	add s8, s8, s9 # t3 = memIni + 24
+	mul s8, s7, t0 
+	add s8, s8, s9 
 for_mostra_campo:
-	beq t6, t2, fim_for_mostra_campo # if (memIni = t2)
-	mul t3, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
-	add t3, t3, t6 # t3 = memIni + 24
+	beq t6, t2, fim_for_mostra_campo 
+	mul t3, s7, t0 
+	add t3, t3, t6 
 	li a7, 1
 	lw a0, (s9)
 	ecall
 	add s9, s9, s7
 for_dentro_mostra_campo:
 	beq t6, t3, fim_for_dentro_mostra_campo
-
 	li s10, 10
 	li s11, 9
-
 	lw a0, (t6)
-
 	beq a0, s10, imprime_cerquilha
 	beq a0, s11, imprime_asterisco
 	blt a0, zero, imprime_flag
 	j imprime_numero
-
 continua_for_mostrar:
-	add t6, t6, s7 # ++
+	add t6, t6, s7
 	j for_dentro_mostra_campo
 fim_for_dentro_mostra_campo:
 	li a7, 4
@@ -105,7 +93,6 @@ fim_for_dentro_mostra_campo:
 	j for_mostra_campo
 fim_for_mostra_campo:
 	ret
-
 imprime_cerquilha:
 	li a7, 4
 	la a0, cerquilha
