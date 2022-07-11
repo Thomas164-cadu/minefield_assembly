@@ -2,21 +2,21 @@
 menu:		.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
 inputFail:	.asciz "\nO valor selecionado n�o existe, favor imprmir novamente\n"
 indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
-matriz:		.word 5,10,10,10,3,10,10,10,10,10,10,10,10,0,0,10,10,10,10,10,10,10,10,10,10,1,10,-4,10,10,10,9,10,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
+interface:		.word 5,10,10,10,3,10,10,10,10,10,10,10,10,0,0,10,10,10,10,10,10,10,10,10,10,1,10,-4,10,10,10,9,10,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
 cerquilha:	.asciz "#"
 quebra_linha: .asciz "\n"
 asterisco:	.asciz "*"
 flag:	.asciz "F"
 	.text
 main:
-	la s6, matriz # carrega endereço da matriz em s6
+	la s6, interface # carrega endereço da matriz em s6
 	li s7, 4 # carrega imediato 4 em s7
-	jal escolher_matriz # chama a escolha da matriz e salva em s0 o tamanho de posicoes do vet e em t0 o tamanho do lado da matriz
-	jal mostrar_matriz # mostra a matriz de acordo com o tamanho escolhido
+	jal escolher_tabuleiro # chama a escolha da matriz e salva em s0 o tamanho de posicoes do vet e em t0 o tamanho do lado da matriz
+	jal mostra_campo # mostra a matriz de acordo com o tamanho escolhido
 	nop # encerra o programa
 
 # escolher matriz, talvez mudar
-escolher_matriz:
+escolher_tabuleiro:
 	# O 4 representa o indíce do tipo de comando de impressão salvo no a7 
 	# Depois o a0 receba o endereço de memória da string e o sistema imprima no console
 	li	a7, 4
@@ -38,7 +38,7 @@ escolher_matriz:
 	li	a7, 4
 	la	a0, inputFail
 	ecall
-	j escolher_matriz
+	j escolher_tabuleiro
 	
 carregar_dados_oito: 
 	li t0, 8
@@ -52,7 +52,7 @@ carregar_dados_doze:
 	li t0, 12
 	mul s0, t0, t0
 	ret
-mostrar_matriz:
+mostra_campo:
 	la s9, indices
 	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
 	add s8, s8, s9 # t3 = memIni + 24
@@ -74,16 +74,16 @@ continua:
 	la s9, indices
 	mul s8, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
 	add s8, s8, s9 # t3 = memIni + 24
-for_mostrar_matriz:
-	beq t6, t2, fim_for_mostrar_matriz # if (memIni = t2)
+for_mostra_campo:
+	beq t6, t2, fim_for_mostra_campo # if (memIni = t2)
 	mul t3, s7, t0 # t3 = s7 * t0 = 4 * 8  = 24
 	add t3, t3, t6 # t3 = memIni + 24
 	li a7, 1
 	lw a0, (s9)
 	ecall
 	add s9, s9, s7
-for_dentro_mostrar_matriz:
-	beq t6, t3, fim_for_dentro_mostrar_matriz
+for_dentro_mostra_campo:
+	beq t6, t3, fim_for_dentro_mostra_campo
 
 	li s10, 10
 	li s11, 9
@@ -97,13 +97,13 @@ for_dentro_mostrar_matriz:
 
 continua_for_mostrar:
 	add t6, t6, s7 # ++
-	j for_dentro_mostrar_matriz
-fim_for_dentro_mostrar_matriz:
+	j for_dentro_mostra_campo
+fim_for_dentro_mostra_campo:
 	li a7, 4
 	la a0, quebra_linha
 	ecall
-	j for_mostrar_matriz
-fim_for_mostrar_matriz:
+	j for_mostra_campo
+fim_for_mostra_campo:
 	ret
 
 imprime_cerquilha:
