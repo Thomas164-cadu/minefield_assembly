@@ -2,9 +2,11 @@
 menu:		.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
 inputFail:	.asciz "\nO valor selecionado n�o existe, favor imprmir novamente\n"
 indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
-matriz:		.word 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9
+matriz:		.word 5,10,10,10,3,10,10,10,10,10,10,10,10,0,0,10,10,10,10,10,10,10,10,10,10,1,10,-4,10,10,10,9,10,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
 cerquilha:	.asciz "#"
 quebra_linha: .asciz "\n"
+asterisco:	.asciz "*"
+flag:	.asciz "F"
 	.text
 main:
 	la s6, matriz # carrega endereço da matriz em s6
@@ -82,9 +84,18 @@ for_mostrar_matriz:
 	add s9, s9, s7
 for_dentro_mostrar_matriz:
 	beq t6, t3, fim_for_dentro_mostrar_matriz
-	li a7, 4
-	la a0, cerquilha
-	ecall
+
+	li s10, 10
+	li s11, 9
+
+	lw a0, (t6)
+
+	beq a0, s10, imprime_cerquilha
+	beq a0, s11, imprime_asterisco
+	blt a0, zero, imprime_flag
+	j imprime_numero
+
+continua_for_mostrar:
 	add t6, t6, s7 # ++
 	j for_dentro_mostrar_matriz
 fim_for_dentro_mostrar_matriz:
@@ -95,7 +106,25 @@ fim_for_dentro_mostrar_matriz:
 fim_for_mostrar_matriz:
 	ret
 
-
+imprime_cerquilha:
+	li a7, 4
+	la a0, cerquilha
+	ecall
+	j continua_for_mostrar
+imprime_asterisco:
+	li a7, 4
+	la a0, asterisco
+	ecall
+	j continua_for_mostrar
+imprime_flag:
+	li a7, 4
+	la a0, flag
+	ecall
+	j continua_for_mostrar
+imprime_numero:
+	li a7, 1
+	ecall
+	j continua_for_mostrar
 	
 	
 	
