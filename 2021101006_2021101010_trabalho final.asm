@@ -1,19 +1,38 @@
+# UNIVERSIDADE FEDERAL DA FRONTEIRA SUL
+# Componente Curricular: Organização de Computadores
+# Docente: Luciano Caimi
+# Discentes: Carlos Eduardo Thomas e Matheus Vieira Santos
 		.data
+#valores inteiros
+indices:		.word 0,1,2,3,4,5,6,7,8,9,0,1
+interface:		.space 576
+
+#strings
 menu:			.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
 inputFail:		.asciz "\nO valor selecionado nï¿½o existe, favor imprmir novamente\n"
-indices:		.word 0,1,2,3,4,5,6,7,8,9,0,1
-interface:		.word 5,10,10,10,3,10,10,10,10,10,10,10,10,0,0,10,10,10,10,10,10,10,10,10,10,1,10,-4,10,10,10,9,10,10,2,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
 cerquilha:		.asciz "#"
 quebra_linha:		.asciz "\n"
 asterisco:		.asciz "*"
 flag:			.asciz "F"
-
+espaco_em_branco:	.asciz " "
 		.text
 main:
+	# vars que vamos usar ao longo do main
 	la s6, interface 
 	li s7, 4 
+	
+	# escolher tabuleiro
 	jal escolher_tabuleiro 
+	
+	# inicializa matriz
+	la a0, interface  
+	mv a1, s0
+	li a2, 9
+	jal inicializa_matriz
+	
+	# mostra interface
 	jal mostra_campo 
+	
 	li a7, 10   # chamada de sistema para encerrar programa
 	ecall
 escolher_tabuleiro:
@@ -49,6 +68,9 @@ mostra_campo:
 	la s9, indices
 	mul s8, s7, t0 
 	add s8, s8, s9
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 for_mostrar_index:
 	beq s9, s8, continua
 	li a7, 1
@@ -112,6 +134,18 @@ imprime_numero:
 	li a7, 1
 	ecall
 	j continua_for_mostrar
-	
+inicializa_matriz:
+# a0 => endereço inicial da matriz
+# a1 => tamanho matriz
+# a2 => valor pra inicializar com
+	mul a1, a1, s7
+	add a1, a0, a1
+for_inicializa_matriz:
+	beq a0, a1, termina_for_inicializar
+	sw a2, (a0)
+	add a0, a0, s7
+	j for_inicializa_matriz
+termina_for_inicializar:
+	ret
 	
 	
