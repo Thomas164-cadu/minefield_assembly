@@ -4,17 +4,17 @@
 # Discentes: Carlos Eduardo Thomas e Matheus Vieira Santos
 		.data
 # valores inteiros
-indices:		.word 0,1,2,3,4,5,6,7,8,9,0,1
-interface:		.space 576
-campo:		    .space 576
+indices:			.word 0,1,2,3,4,5,6,7,8,9,0,1
+interface:			.space 576
+campo:		    	.space 576
 
 # strings
-menu:			.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
-inputFail:		.asciz "\nO valor selecionado não existe, favor imprmir novamente\n"
-cerquilha:		.asciz "#"
+menu:				.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
+inputFail:			.asciz "\nO valor selecionado não existe, favor imprmir novamente\n"
+cerquilha:			.asciz "#"
 quebra_linha:		.asciz "\n"
-asterisco:		.asciz "*"
-flag:			.asciz "F"
+asterisco:			.asciz "*"
+flag:				.asciz "F"
 espaco_em_branco:	.asciz " "
 		.text
 main:
@@ -26,18 +26,18 @@ main:
 	la	a1, inputFail
 	jal escolher_tabuleiro 
 	
-	# inicializa matriz interface
+	# inicializa matriz campo
 	add a0, a0, zero
     add a1, a1, zero
-	li a2, 10 
-    la a3, interface
+	li a2, 0 
+    la a3, campo
 	jal inicializa_matriz
 
 	# inicializa matriz interface
 	add a0, a0, zero
     add a1, a1, zero
-	li a2, 0 
-    la a3, campo
+	li a2, 10
+    la a3, interface
 	jal inicializa_matriz
 	
 	# mostra interface
@@ -55,8 +55,8 @@ main:
 # a0 => endereço para o texto do menu
 # a1 => endereço para o texto do inputfail
 # retorno
-# a0 => tamanho do lado da matriz 
-# a1 => tamanho do array da matriz
+# a0 => tamanho do lado da matriz (8/10/12)
+# a1 => tamanho do array da matriz (64/100/144)
 
 escolher_tabuleiro:
     add t0, a1, zero  
@@ -91,7 +91,7 @@ carregar_dados_doze:
 # parametros
 # a0 => tamanho do lado da matriz (8/10/12)
 # a1 => tamanho do array da matriz (64/100/144)
-# a2 => valor pra inicializar com
+# a2 => valor pra inicializar matriz
 # a3 => endereço inicial da matriz
 # retorno 
 # nao tem
@@ -110,8 +110,8 @@ termina_for_inicializar:
 
 # Função mostra_campo
 # parametros
-# a0 => tamanho do lado da matriz 
-# a1 => tamanho do array da matriz
+# a0 => tamanho do lado da matriz (8/10/12)
+# a1 => tamanho do array da matriz (64/100/144)
 # a2 => endereço inicial da matriz interface
 # a3 => endereço inicial do array dos indices
 # retorno
@@ -122,16 +122,13 @@ mostra_campo:
     mv s1, a1
     mv s2, a2
     mv s3, a3
-
 mostra_index:
 	mul t0, s7, s0
 	add t0, t0, s3
 	add t1, zero, s3
-
 	li a7, 4
 	la a0, espaco_em_branco
 	ecall
-
 for_mostrar_index:
 	beq t0, t1, continua
 	li a7, 1
@@ -143,7 +140,6 @@ continua:
 	li a7, 4
 	la a0, quebra_linha
 	ecall
-
 mostra_matriz:
 	mul t0, s7, s1
 	add t0, t0, s2
