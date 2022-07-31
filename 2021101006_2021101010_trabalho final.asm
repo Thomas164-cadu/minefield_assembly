@@ -230,7 +230,8 @@ imprime_numero:
 #retorno
 #valores de linha e coluna armazenados em t0 e t1 respectivamente
 menu_de_jogadas:
-	#addi t4, s0, 1
+	# salvar o tamanho do lado da matriz (8/10/12)em outra var pra nao perder e usar nas comparações
+	# addi t4, s0, 1
 inicia_menu_jogadas:
 	li a7, 4
 	la a0, menu_escolha_jogada
@@ -250,7 +251,7 @@ continua_menu_jogada:
 	ecall
 	# valida se é menor que zero
 	blt a0, zero, menu_jogadas_erro
-	#valida se é maior que o tamanho do lado da matriz
+	#valida se é maior que o tamanho do lado da matriz, refatorar pra nao usar o valor de s0 e sim o valor que vem como parametro
 	bge a0, s0, menu_jogadas_erro
 	#add t0, zero, a0
 	li a7, 4
@@ -262,18 +263,28 @@ continua_menu_jogada:
 	blt a0, zero, menu_jogadas_erro
 	#valida se é maior que o tamanho do lado da matriz
 	bge a0, s0, menu_jogadas_erro
-	#add t1, zero, a0
+	add t1, zero, a0
 	
-	#mul t0, t0, t1
-	#mul t0,	t0, s7
-	#la t1, campo
-	#add t0, t0, t1
+	mul t0, t0, t1
+	mul t0,	t0, s7
+	la t1, campo
+	add t0, t0, t1
 	#verifica se o valor da posi��o de mem�ria escolhida contem a bomba e se tiver, bye bye
-	#lw t2, (t0)
-	#li t3, 9
-	#beq t2, t3, fim_menu_de_jogadas
+	lw t2, (t0)
+	li t3, 9
+	beq t2, t3, fim_menu_de_jogadas
+	#salvar o valor de ra
+	add s2, zero, ra
+	#chamar a função
+	add a0, s0, zero
+	add a1, s1, zero
+	la a2, interface
+	la a3, indices
+	jal mostra_campo
+	#guardar o valor de ra de novo
+	add ra, s2, zero
 	j inicia_menu_jogadas
-	#ret
+	ret
 menu_jogadas_erro:
 	li a7, 4
     	la a0, inputFail
