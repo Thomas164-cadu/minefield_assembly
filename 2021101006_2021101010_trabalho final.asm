@@ -230,7 +230,7 @@ imprime_numero:
 #retorno
 #valores de linha e coluna armazenados em t0 e t1 respectivamente
 menu_de_jogadas:
-	add t4, a0, zero
+	#addi t4, s0, 1
 inicia_menu_jogadas:
 	li a7, 4
 	la a0, menu_escolha_jogada
@@ -246,37 +246,34 @@ continua_menu_jogada:
 	li a7, 4
 	la a0, menu_linha
 	ecall
-	
 	li a7, 5
-	ecall 
+	ecall
 	# valida se é menor que zero
 	blt a0, zero, menu_jogadas_erro
 	#valida se é maior que o tamanho do lado da matriz
-	blt t4, a0, menu_jogadas_erro
-	add t0, zero, a0
-	
+	bge a0, s0, menu_jogadas_erro
+	#add t0, zero, a0
 	li a7, 4
 	la a0, menu_coluna
 	ecall
-	
 	li a7, 5
 	ecall
 	# valida se é menor que zero
 	blt a0, zero, menu_jogadas_erro
 	#valida se é maior que o tamanho do lado da matriz
-	blt t4, a0, menu_jogadas_erro
-	add t1, zero, a0
+	bge a0, s0, menu_jogadas_erro
+	#add t1, zero, a0
 	
-	mul t0, t0, t1
-	mul t0,	t0, s7
-	la t1, campo
-	add t0, t0, t1
+	#mul t0, t0, t1
+	#mul t0,	t0, s7
+	#la t1, campo
+	#add t0, t0, t1
 	#verifica se o valor da posi��o de mem�ria escolhida contem a bomba e se tiver, bye bye
-	lw t2, (t0)
-	li t3, 9
-	beq t2, t3, fim_menu_de_jogadas
+	#lw t2, (t0)
+	#li t3, 9
+	#beq t2, t3, fim_menu_de_jogadas
 	j inicia_menu_jogadas
-	ret
+	#ret
 menu_jogadas_erro:
 	li a7, 4
     	la a0, inputFail
