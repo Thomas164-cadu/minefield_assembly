@@ -230,6 +230,8 @@ imprime_numero:
 #retorno
 #valores de linha e coluna armazenados em t0 e t1 respectivamente
 menu_de_jogadas:
+	add t4, a0, zero
+inicia_menu_jogadas:
 	li a7, 4
 	la a0, menu_escolha_jogada
 	ecall
@@ -237,12 +239,9 @@ menu_de_jogadas:
 	ecall
 	li t0, 1
 	li t1, 2
+	beq a0, t0, continua_menu_jogada
 	beq a0, t1, continua_menu_jogada
-	beq a0, t2, continua_menu_jogada
-	li a7, 4
-    	la a0, inputFail
-	ecall
-	j menu_de_jogadas
+    	j menu_jogadas_erro
 continua_menu_jogada:
 	li a7, 4
 	la a0, menu_linha
@@ -253,7 +252,7 @@ continua_menu_jogada:
 	# valida se é menor que zero
 	blt a0, zero, menu_jogadas_erro
 	#valida se é maior que o tamanho do lado da matriz
-	blt a0, t4, menu_jogadas_erro
+	blt t4, a0, menu_jogadas_erro
 	add t0, zero, a0
 	
 	li a7, 4
@@ -265,7 +264,7 @@ continua_menu_jogada:
 	# valida se é menor que zero
 	blt a0, zero, menu_jogadas_erro
 	#valida se é maior que o tamanho do lado da matriz
-	blt a0, t4, menu_jogadas_erro
+	blt t4, a0, menu_jogadas_erro
 	add t1, zero, a0
 	
 	mul t0, t0, t1
@@ -276,13 +275,13 @@ continua_menu_jogada:
 	lw t2, (t0)
 	li t3, 9
 	beq t2, t3, fim_menu_de_jogadas
-	j menu_de_jogadas
+	j inicia_menu_jogadas
 	ret
 menu_jogadas_erro:
 	li a7, 4
     	la a0, inputFail
 	ecall
-	j menu_de_jogadas
+	j inicia_menu_jogadas
 fim_menu_de_jogadas:
 	ret
 	
