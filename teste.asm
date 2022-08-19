@@ -20,10 +20,10 @@ espaco_em_branco:	.asciz " "
 menu_linha:	.asciz "\nQual a linha de sua jogada?\n"
 menu_coluna:	.asciz "\nQual a coluna de sua jogada?\n"
 menu_escolha_jogada:	.asciz "\nVocê deseja: \n1 - Abrir uma casa \n2 - Movimentar uma flag\n"
-mensagem_perdeu:	.asciz "\nPoxa, você perdeu!\n"
-mensagem_ganhou:	.asciz "\nBoa, você ganhou!\n"
-mensagem_erro_flag:	.asciz "\nVish, essa casa aí tem flag!\n"
-mensagem_erro_campo_ja_aberto:	.asciz "\nEsse aí não jogar flag meu chapa, você já abriu ele\n"
+mensagem_perdeu:	.asciz "\nPoxa, você perdeu!\n\n"
+mensagem_ganhou:	.asciz "\nBoa, você ganhou!\n\n"
+mensagem_erro_flag:	.asciz "\nVish, essa casa aí já tem flag!\n"
+mensagem_erro_campo_ja_aberto:	.asciz "\nEsse aí não dá pra jogar flag meu chapa, você já abriu ele\n"
 			.text
 main:
 	li s7, 4
@@ -138,8 +138,14 @@ mostra_index:
 	li a7, 4
 	la a0, espaco_em_branco
 	ecall
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 for_mostrar_index:
 	beq t0, t1, continua
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	li a7, 1
 	lw a0, (t1)
 	ecall
@@ -158,6 +164,9 @@ for_mostra_campo:
 	beq t1, t0, fim_for_mostra_campo 
 	mul t3, s7, s0 
 	add t3, t3, t1
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	li a7, 1
 	lw a0, (t2)
 	ecall
@@ -166,6 +175,9 @@ for_dentro_mostra_campo:
 	beq t1, t3, fim_for_dentro_mostra_campo
 	li t4, 10
 	li t5, 9
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	lw a0, (t1)
 	beq a0, t4, imprime_cerquilha
 	beq a0, t5, imprime_asterisco
