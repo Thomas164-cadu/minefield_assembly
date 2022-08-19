@@ -37,7 +37,7 @@ menu_escolha_jogada:		.asciz "\nVocï¿½ deseja: \n1 - Abrir uma casa \n2 - Inseri
 main:
 	# vars que vamos usar ao longo do main
 	li s7, 4 
-	#s10 irï¿½ armazenar o nï¿½mero de linhas para uso na funï¿½ï¿½o insere_bombas
+	#s10 irï¿½ armazenar o nï¿½mero de linhas para uso na funï¿½ï¿½o insere_bombas e calcula_bombas
 	
 	# escolher tabuleiro
 	la	a0, menu
@@ -72,6 +72,11 @@ main:
 	la a0, campo
 	mv a1, s0
 	jal INSERE_BOMBA
+	
+	# chamada da função calcula_bombas
+	la a0, campo
+	mv a1, s0
+	jal calcula_bombas
 	
 	# menu de jogadas
 	add a0, s11, zero
@@ -293,9 +298,139 @@ menu_jogadas_erro:
 fim_menu_de_jogadas:
 	ret
 	
+calcula_bombas:
+	#primeiro setamos as variáveis para iniciar o for
+	mul a2, a1, a1
+	li t4, 4
+	mul a3, a2, t4
+	add a4, a3, a0
+	mv t1, a0
+	li s9, 9
+	li t0, 1
+	
+for_calcula_bombas:
+	beq t1, a4, fim_calcula_bombas
+	mv t3, t1
+	lw t2, (t1)
+	add t1, t1, t4
+	beq t2, s9, valida_bomba
+	j for_calcula_bombas
+	#após verificar se existe a bomba na posição ele volta para o for se não for, caso for, valida
+	
+valida_bomba:
+	#pulamos para a próxima posição
+	add a3, t3, t4
+	lw t5, (a3)	
+	#verificamos se nessa posição existe uma bomba se nao vamos para função de verificação
+	bne t5, s9, right_spot
+next_spot_one:
+	sub a3, t3, t4
+	lw t5, (a3)
+	bne t5, s9, left_spot
+next_spot_two:
+	mul a5, a1, t4
+	sub a3, t3, a5
+	lw t5, (a3)
+	blt a3, a0, next_spot_five
+	bne t5, s9, top_spot
+next_spot_three:
+	#esse é no a5 pra não perder o top
+	sub a5, a3, t4
+	lw t5, (a5)
+	bne t5, s9, top_left_spot
+next_spot_four:
+	add a3, a3, t4
+	lw t5, (a3)
+	bne t5, s9, top_right_spot
+next_spot_five:
+	mul a5, a1, t4
+	add a3, t3, a5
+	lw t5, (a3)
+	bgt a3, a4, for_calcula_bombas
+	bne t5, s9, bottom_spot
+next_spot_six:
+	sub a5, a3, t4
+	lw t5, (a5)
+	bne t5, s9, bottom_left_spot
+next_spot_seven:
+	add a3, a3, t4
+	lw t5, (a3)
+	bne t5, s9, bottom_right_spot
+next_spot_eight:
+	j for_calcula_bombas
 	
 
+#POSIÇÕES
+right_spot:
+	#na função de verificação, fazemos os calculos para verificar se não se trata de um canto
+	bgt a3, a4, next_spot_one
+	div t6, a3, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, zero, next_spot_one
+	#após a verificação de canto aumentamos a contagem de bombas
+	add t5, t5, t0
+	sw t5, (a3)
+	#e voltamos para a próxima posição ao redor da bomba
+	j next_spot_one
+left_spot:
+	blt a3, a0, next_spot_two
+	div t6, a3, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, t0, next_spot_two
+	add t5, t5, t0
+	sw t5, (a3)
+	j next_spot_two
+top_spot:
+	add t5, t5, t0
+	sw t5, (a3)
+	j next_spot_three
+top_left_spot:
+	blt a5, a0, next_spot_four
+	div t6, a5, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, t0, next_spot_four
+	add t5, t5, t0
+	sw t5, (a5)
+	j next_spot_four
+top_right_spot:
+	bgt a3, a4, next_spot_five
+	div t6, a3, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, zero, next_spot_five
+	add t5, t5, t0
+	sw t5, (a5)
+	j next_spot_five
+bottom_spot:
+	add t5, t5, t0
+	sw t5, (a3)
+	j next_spot_six
+bottom_left_spot:
+	div t6, a5, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, t0, next_spot_seven
+	add t5, t5, t0
+	sw t5, (a5)
+	j next_spot_seven
+bottom_right_spot:
+	bgt a3, a4, next_spot_eight
+	div t6, a3, a0
+	div t6, t6, t4
+	rem t6, t6, a1 
+	beq t6, zero, next_spot_eight
+	add t5, t5, t0
+	sw t5, (a5)
+	j next_spot_eight
+					
+fim_calcula_bombas:
+	ret
 	
+	
+
 	
 ############################################################
 #Implementaï¿½ï¿½o da funï¿½ï¿½o insere_bombas
