@@ -11,7 +11,7 @@ indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
 interface:	.space 576
 campo:	.space 576
 menu:	.asciz "\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n4 - Sair\n"
-inputFail:	.asciz "\nO valor selecionado não existe, favor inserir novamente\n"
+inputFail:	.asciz "\nOpção inválida, favor inserir novamente\n"
 cerquilha:	.asciz "#"
 quebra_linha:	.asciz "\n"
 asterisco:	.asciz "*"
@@ -20,10 +20,10 @@ espaco_em_branco:	.asciz " "
 menu_linha:	.asciz "\nQual a linha de sua jogada?\n"
 menu_coluna:	.asciz "\nQual a coluna de sua jogada?\n"
 menu_escolha_jogada:	.asciz "\nVocê deseja: \n1 - Abrir uma casa \n2 - Movimentar uma flag\n"
-mensagem_perdeu:	.asciz "\nPoxa, você perdeu!\n\n"
-mensagem_ganhou:	.asciz "\nBoa, você ganhou!\n\n"
-mensagem_erro_flag:	.asciz "\nVish, essa casa aí já tem flag!\n"
-mensagem_erro_campo_ja_aberto:	.asciz "\nEsse aí não dá pra jogar flag meu chapa, você já abriu ele\n"
+mensagem_perdeu:	.asciz "\nPoxa, você perdeu!\nNão fica assim não, que tal jogar novamente?\nSó não perde quem não joga\n"
+mensagem_ganhou:	.asciz "\nBoa, você ganhou meu chapa!\nQue tal continuar mostrando essa habilidade e desafiando nosso código Assembly?\n"
+mensagem_erro_flag:	.asciz "\nVish, essa casa aí já tem flag meu chapa!\n"
+mensagem_erro_campo_ja_aberto:	.asciz "\nVish, essa casa aí já foi aberta meu chapa!\n"
 			.text
 main:
 	li s7, 4
@@ -75,12 +75,6 @@ main:
 	add a0, s11, zero
 	la a1, inputFail
 	jal menu_de_jogadas
-	
-	add a0, s11, zero
-	add a1, s10, zero
-	la a2, campo
-	la a3, indices
-	jal mostra_campo
 	
 	j main
 
@@ -263,13 +257,45 @@ abre_casa:
 	add t4, t0, t1
 	lw t2, (t4)
 	bltz t2, menu_jogadas_erro_flag
+	li t3, 10
+	bne t2, t3, erro_campo_ja_aberto
 	la t1, campo
 	add t6, t0, t1
 	lw t2, (t6)
 	li t3, 9
 	beq t2, t3, perdeu
 	sw t2, (t4)
+	j verifica_se_ganhou
+volta_abre_casa:
 	j exibe_interface_volta_menu
+verifica_se_ganhou:
+	li t5, 10
+	li t3, -10
+	li t6, 0
+	la t1, interface
+	mul t2, s0, s0
+	mul t2, t2, s7
+	add t2, t2, t1
+for_verificar_ganhou:
+	beq t2, t1, termina_for_verificar_ganhou
+	lw t4, (t1)
+	beq t4, t5, incrementa
+	beq t4, t3, incrementa
+	add t1, t1, s7
+	j for_verificar_ganhou
+incrementa:
+	addi t6, t6, 1
+	add t1, t1, s7
+	j for_verificar_ganhou
+termina_for_verificar_ganhou:
+	li t5, 15
+	beq t5, t6, ganhou
+	j volta_abre_casa
+ganhou:
+	li a7, 4
+    la a0, mensagem_ganhou
+    ecall
+	j exibe_campo_e_ret
 movimentar_flag:
 	la t1, interface
 	add t0, t0, t1
@@ -286,15 +312,14 @@ valida_erro_campo_ja_aberto:
 	beq t3, t5, pode_mudar
 	j erro_campo_ja_aberto
 exibe_interface_volta_menu:
-	add s2, zero, ra
+	add s4, zero, ra
 	add a0, s0, zero
 	add a1, s1, zero
 	la a2, interface
 	la a3, indices
 	jal mostra_campo
-	add ra, s2, zero
+	add ra, s4, zero
 	j inicia_menu_jogadas
-	ret
 menu_jogadas_erro:
 	li a7, 4
     la a0, inputFail
@@ -314,8 +339,15 @@ perdeu:
 	li a7, 4
     la a0, mensagem_perdeu
     ecall
+exibe_campo_e_ret:
+	add s4, zero, ra
+	add a0, s0, zero
+	add a1, s1, zero
+	la a2, campo
+	la a3, indices
+	jal mostra_campo
+	add ra, s4, zero
 	ret
-	
 INSERE_BOMBA:
 	la	t0, salva_S0
 	sw  	s0, 0 (t0)		
