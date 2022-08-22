@@ -432,6 +432,7 @@ valida_direita:
     j valida_esquerda 
 continua_valida_direita:
     sub s5, t4, a0
+	div s5, s5, s7
     rem t6, s5, a1 # j % lado
     bne t6, zero, salva_valida_direita # j % 12 != 0
     j valida_esquerda
@@ -445,6 +446,7 @@ valida_esquerda:
     j valida_por_cima # vetor[j] != 9
 continua_valida_esquerda:
     sub s5, t4, a0
+	div s5, s5, s7
     rem t6, s5, a1 # j % 12
     addi s5, a1, -1
     bne t6, s5, salva_valida_esquerda # j % 12 != 11
@@ -475,6 +477,7 @@ continua_continua_valida_esquerda_cima:
 continua_valida_esquerda_cima:
     addi s5, a1, -1
     sub s8, s1, a0
+	div s8, s8, s7
     rem s2, s8, a1
     bne s2, s5, salva_valida_esquerda_cima
     j valida_direita_cima
@@ -488,6 +491,7 @@ valida_direita_cima:
     j valida_por_baixo
 continua_valida_direita_cima:
     sub s8, s1, a0
+	div s8, s8, s7
     rem s2, s8, a1
     bne s2, zero, salva_valida_direita_cima
     j valida_por_baixo
@@ -514,6 +518,7 @@ valida_esquerda_baixo:
 continua_valida_esquerda_baixo:
     addi s5, a1, -1
     sub s8, s1, a0
+	div s8, s8, s7
     rem s2, s8, a1
     bne s2, s5, salva_valida_esquerda_baixo
     j valida_direita_baixo
@@ -528,6 +533,7 @@ valida_direita_baixo:
     j continua_for_calcula_bombas
 continua_valida_direita_baixo:
     sub s5, s1, a0
+	div s5, s5, s7
     rem s2, s5, a1
     bne s2, zero, salva_valida_direita_baixo
     j continua_for_calcula_bombas
