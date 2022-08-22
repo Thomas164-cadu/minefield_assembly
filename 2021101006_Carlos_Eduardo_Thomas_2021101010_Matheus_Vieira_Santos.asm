@@ -2,112 +2,92 @@
 # Componente Curricular: OrganizaÃ§Ã£o de Computadores
 # Docente: Luciano Caimi
 # Discentes: Carlos Eduardo Thomas e Matheus Vieira Santos
-		.data
-salva_S0:			.word		0
-salva_ra:			.word		0
-salva_ra1:			.word		0
 
-#########################################################
-# necessï¿½rio em caso de debug da funcao
-#espaco:			.asciz		" "
-#dois_pontos:		.asciz		": "
-#nova_linha:		.asciz		"\n"
-#posicao:		.asciz		"\nPosicao bomba "
-#########################################################
-
-#########################################################
-#INï¿½CIO DO Cï¿½DIGO IMPLEMENTADO SOMENTE PELOS ALUNOS
-# valores inteiros
-indices:			.word 0,1,2,3,4,5,6,7,8,9,0,1
-interface:			.space 576
-campo:		    		.space 576
-
-# strings
-menu:				.asciz	"\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n"
-inputFail:			.asciz "\nO valor selecionado nÃ£o existe, favor inserir novamente\n"
-cerquilha:			.asciz "#"
-quebra_linha:			.asciz "\n"
-asterisco:			.asciz "*"
-flag:				.asciz "F"
-espaco_em_branco:		.asciz " "
-menu_linha:			.asciz "\nQual a linha de sua jogada?\nPara o campo 12x12, favor inserir valores entre 0 e 11\n"
-menu_coluna:			.asciz "\nQual a coluna de sua jogada?\nPara o campo 12x12, favor inserir valores entre 0 e 11\n"
-menu_escolha_jogada:		.asciz "\nVocï¿½ deseja: \n1 - Abrir uma casa \n2 - Inserir uma flag\n"
-		.text
+			.data
+salva_S0:	.word 0
+salva_ra:	.word 0
+salva_ra1:	.word 0
+indices:	.word 0,1,2,3,4,5,6,7,8,9,0,1
+interface:	.space 576
+campo:	.space 576
+menu:	.asciz "\nCampo Minado \nQual o tamanho do campo que deseja jogar? \n1 - 8x8 \n2 - 10x10 \n3 - 12x12\n4 - Sair\n"
+inputFail:	.asciz "\nOpÃ§Ã£o invÃ¡lida, favor inserir novamente\n"
+cerquilha:	.asciz "#"
+quebra_linha:	.asciz "\n"
+asterisco:	.asciz "*"
+flag:	.asciz "F"
+espaco_em_branco:	.asciz " "
+menu_linha:	.asciz "\nQual a linha de sua jogada?\n"
+menu_coluna:	.asciz "\nQual a coluna de sua jogada?\n"
+menu_escolha_jogada:	.asciz "\nVocÃª deseja: \n1 - Abrir uma casa \n2 - Movimentar uma flag\n"
+mensagem_perdeu:	.asciz "\nPoxa, vocÃª perdeu!\nNÃ£o fica assim nÃ£o, que tal jogar novamente?\nSÃ³ nÃ£o perde quem nÃ£o joga\n"
+mensagem_ganhou:	.asciz "\nBoa, vocÃª ganhou meu chapa!\nQue tal continuar mostrando essa habilidade e desafiando nosso cÃ³digo Assembly?\n"
+mensagem_erro_flag:	.asciz "\nVish, essa casa aÃ­ jÃ¡ tem flag meu chapa!\n"
+mensagem_erro_campo_ja_aberto:	.asciz "\nVish, essa casa aÃ­ jÃ¡ foi aberta meu chapa!\n"
+			.text
 main:
-	# vars que vamos usar ao longo do main
-	li s7, 4 
-	#s10 irï¿½ armazenar o nï¿½mero de linhas para uso na funï¿½ï¿½o insere_bombas e calcula_bombas
+	li s7, 4
+
+	la a0, menu
+	la a1, inputFail
+	jal escolher_tabuleiro
 	
-	# escolher tabuleiro
-	la	a0, menu
-	la	a1, inputFail
-	jal escolher_tabuleiro 
-	
-	# inicializa matriz campo
 	add a0, a0, zero
-    	add a1, a1, zero
+    add a1, a1, zero
 	li a2, 0 
-    	la a3, campo
+    la a3, campo
 	jal inicializa_matriz
 
-	# inicializa matriz interface
 	add a0, a0, zero
-    	add a1, a1, zero
+    add a1, a1, zero
 	li a2, 10
-    	la a3, interface
+    la a3, interface
 	jal inicializa_matriz
 	
-	# mostra interface
 	add a0, a0, zero
 	add a1, a1, zero
+		
+	add s11, a0, zero
+	add s10, a1, zero
+
 	la a2, interface
 	la a3, indices
-	jal mostra_campo 
+	jal mostra_campo
 	
-	# salva tamanho do lado da matriz, refatorar esse cara aqui
-	add s11, a0, zero
-	
-	# chamada da funï¿½ï¿½o insere_bombas
 	la a0, campo
 	mv a1, s0
 	jal INSERE_BOMBA
-	
-	# chamada da função calcula_bombas
+
 	la a0, campo
 	mv a1, s0
 	jal calcula_bombas
 	
-	# menu de jogadas
 	add a0, s11, zero
+	add a1, s10, zero
 	la a1, inputFail
 	jal menu_de_jogadas
 	
-	li a7, 10   # chamada de sistema para encerrar programa
+	j main
+
+sair:
+	li a7, 10
 	ecall
-
-# FunÃ§Ã£o escolher_tabuleiro	
-# parametros
-# a0 => endereÃ§o para o texto do menu
-# a1 => endereÃ§o para o texto do inputfail
-# retorno
-# a0 => tamanho do lado da matriz (8/10/12)
-# a1 => tamanho do array da matriz (64/100/144)
-
 escolher_tabuleiro:
-    add t0, a1, zero  
-	li	a7, 4
+	add t0, a1, zero  
+	li a7, 4
 	ecall
-	li	a7, 5
+	li a7, 5
 	ecall
-	li	t1, 1
-	li	t2, 2
-	li	t3, 3
-	beq	a0, t1, carregar_dados_oito
-	beq	a0, t2, carregar_dados_dez
-	beq	a0, t3, carregar_dados_doze
-	li	a7, 4
-    	add a0, zero, t0
+	li t1, 1
+	li t2, 2
+	li t3, 3
+	li t4, 4
+	beq a0, t1, carregar_dados_oito
+	beq a0, t2, carregar_dados_dez
+	beq a0, t3, carregar_dados_doze
+	beq a0, t4, sair
+	li a7, 4
+    add a0, zero, t0
 	ecall
 	j escolher_tabuleiro
 carregar_dados_oito: 
@@ -122,16 +102,7 @@ carregar_dados_doze:
 	li a0, 12
 	mul a1, a0, a0
 	ret
-
-# FunÃ§Ã£o inicializa_matriz
-# parametros
-# a0 => tamanho do lado da matriz (8/10/12)
-# a1 => tamanho do array da matriz (64/100/144)
-# a2 => valor pra inicializar matriz
-# a3 => endereÃ§o inicial da matriz
-# retorno 
-# nao tem
-
+	
 inicializa_matriz:
 	add t0, a3, zero 
 	mul t1, a1, s7
@@ -144,20 +115,11 @@ for_inicializa_matriz:
 termina_for_inicializar:
 	ret
 
-# FunÃ§Ã£o mostra_campo
-# parametros
-# a0 => tamanho do lado da matriz (8/10/12)
-# a1 => tamanho do array da matriz (64/100/144)
-# a2 => endereÃ§o inicial da matriz interface
-# a3 => endereÃ§o inicial do array dos indices
-# retorno
-# nao tem
-
 mostra_campo:
 	mv s0, a0
-    	mv s1, a1
-    	mv s2, a2
-    	mv s3, a3
+    mv s1, a1
+    mv s2, a2
+    mv s3, a3
 mostra_index:
 	mul t0, s7, s0
 	add t0, t0, s3
@@ -165,8 +127,14 @@ mostra_index:
 	li a7, 4
 	la a0, espaco_em_branco
 	ecall
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 for_mostrar_index:
 	beq t0, t1, continua
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	li a7, 1
 	lw a0, (t1)
 	ecall
@@ -185,6 +153,9 @@ for_mostra_campo:
 	beq t1, t0, fim_for_mostra_campo 
 	mul t3, s7, s0 
 	add t3, t3, t1
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	li a7, 1
 	lw a0, (t2)
 	ecall
@@ -193,6 +164,9 @@ for_dentro_mostra_campo:
 	beq t1, t3, fim_for_dentro_mostra_campo
 	li t4, 10
 	li t5, 9
+	li a7, 4
+	la a0, espaco_em_branco
+	ecall
 	lw a0, (t1)
 	beq a0, t4, imprime_cerquilha
 	beq a0, t5, imprime_asterisco
@@ -227,16 +201,8 @@ imprime_numero:
 	li a7, 1
 	ecall
 	j continua_for_mostrar
-	
-#funï¿½ï¿½o do menu de jogadas
-# a0 => tamanho do lado da matriz (8/10/12)
-# a1 => endereÃ§o para o texto do inputfail
-#Lado da matriz em a0
-#retorno
-#valores de linha e coluna armazenados em t0 e t1 respectivamente
+
 menu_de_jogadas:
-	# salvar o tamanho do lado da matriz (8/10/12)em outra var pra nao perder e usar nas comparaÃ§Ãµes
-	# addi t4, s0, 1
 inicia_menu_jogadas:
 	li a7, 4
 	la a0, menu_escolha_jogada
@@ -247,308 +213,322 @@ inicia_menu_jogadas:
 	li t1, 2
 	beq a0, t0, continua_menu_jogada
 	beq a0, t1, continua_menu_jogada
-    	j menu_jogadas_erro
+    j menu_jogadas_erro
 continua_menu_jogada:
+	add s9, a0, zero
 	li a7, 4
 	la a0, menu_linha
 	ecall
+
 	li a7, 5
 	ecall
-	# valida se Ã© menor que zero
+
 	blt a0, zero, menu_jogadas_erro
-	#valida se Ã© maior que o tamanho do lado da matriz, refatorar pra nao usar o valor de s0 e sim o valor que vem como parametro
 	bge a0, s0, menu_jogadas_erro
-	#add t0, zero, a0
+	add t0, zero, a0
+
 	li a7, 4
 	la a0, menu_coluna
 	ecall
+
 	li a7, 5
 	ecall
-	# valida se Ã© menor que zero
+
 	blt a0, zero, menu_jogadas_erro
-	#valida se Ã© maior que o tamanho do lado da matriz
 	bge a0, s0, menu_jogadas_erro
 	add t1, zero, a0
-	
-	mul t0, t0, t1
-	mul t0,	t0, s7
+	li s8, 1
+	mul t0, t0, s0
+	add t0,	t0, t1
+	mul t0, t0, s7
+	beq s9, s8, abre_casa
+	j movimentar_flag
+abre_casa:
+	la t1, interface
+	add t4, t0, t1
+	lw t2, (t4)
+	bltz t2, menu_jogadas_erro_flag
+	li t3, 10
+	bne t2, t3, erro_campo_ja_aberto
 	la t1, campo
-	add t0, t0, t1
-	#verifica se o valor da posiï¿½ï¿½o de memï¿½ria escolhida contem a bomba e se tiver, bye bye
-	lw t2, (t0)
+	add t6, t0, t1
+	lw t2, (t6)
 	li t3, 9
-	beq t2, t3, fim_menu_de_jogadas
-	#salvar o valor de ra
-	add s2, zero, ra
-	#chamar a funÃ§Ã£o
+	beq t2, t3, perdeu
+	sw t2, (t4)
+	j verifica_se_ganhou
+volta_abre_casa:
+	j exibe_interface_volta_menu
+verifica_se_ganhou:
+	li t5, 10
+	li t3, -10
+	li t6, 0
+	la t1, interface
+	mul t2, s0, s0
+	mul t2, t2, s7
+	add t2, t2, t1
+for_verificar_ganhou:
+	beq t2, t1, termina_for_verificar_ganhou
+	lw t4, (t1)
+	beq t4, t5, incrementa
+	beq t4, t3, incrementa
+	add t1, t1, s7
+	j for_verificar_ganhou
+incrementa:
+	addi t6, t6, 1
+	add t1, t1, s7
+	j for_verificar_ganhou
+termina_for_verificar_ganhou:
+	li t5, 15
+	beq t5, t6, ganhou
+	j volta_abre_casa
+ganhou:
+	li a7, 4
+    la a0, mensagem_ganhou
+    ecall
+	j exibe_campo_e_ret
+movimentar_flag:
+	la t1, interface
+	add t0, t0, t1
+	addi t2, zero, -1
+	lw t3, (t0)
+	li t5, 10
+	bne t3, t5, valida_erro_campo_ja_aberto
+pode_mudar:
+	mul t2,t2,t3
+	sw t2, (t0)
+	j exibe_interface_volta_menu
+valida_erro_campo_ja_aberto:
+	li t5, -10
+	beq t3, t5, pode_mudar
+	j erro_campo_ja_aberto
+exibe_interface_volta_menu:
+	add s4, zero, ra
 	add a0, s0, zero
 	add a1, s1, zero
 	la a2, interface
 	la a3, indices
 	jal mostra_campo
-	#guardar o valor de ra de novo
-	add ra, s2, zero
+	add ra, s4, zero
 	j inicia_menu_jogadas
-	ret
 menu_jogadas_erro:
 	li a7, 4
-    	la a0, inputFail
+    la a0, inputFail
 	ecall
 	j inicia_menu_jogadas
-fim_menu_de_jogadas:
+menu_jogadas_erro_flag:
+	li a7, 4
+    la a0, mensagem_erro_flag
+	ecall
+	j inicia_menu_jogadas
+erro_campo_ja_aberto:
+	li a7, 4
+    la a0, mensagem_erro_campo_ja_aberto
+	ecall
+	j inicia_menu_jogadas
+perdeu:
+	li a7, 4
+    la a0, mensagem_perdeu
+    ecall
+exibe_campo_e_ret:
+	add s4, zero, ra
+	add a0, s0, zero
+	add a1, s1, zero
+	la a2, campo
+	la a3, indices
+	jal mostra_campo
+	add ra, s4, zero
 	ret
-	
-calcula_bombas:
-	#primeiro setamos as variáveis para iniciar o for
-	mul a2, a1, a1
-	li t4, 4
-	mul a3, a2, t4
-	add a4, a3, a0
-	mv t1, a0
-	li s9, 9
-	li t0, 1
-	
-for_calcula_bombas:
-	beq t1, a4, fim_calcula_bombas
-	mv t3, t1
-	lw t2, (t1)
-	add t1, t1, t4
-	beq t2, s9, valida_bomba
-	j for_calcula_bombas
-	#após verificar se existe a bomba na posição ele volta para o for se não for, caso for, valida
-	
-valida_bomba:
-	#pulamos para a próxima posição
-	add a3, t3, t4
-	lw t5, (a3)	
-	#verificamos se nessa posição existe uma bomba se nao vamos para função de verificação
-	bne t5, s9, right_spot
-next_spot_one:
-	sub a3, t3, t4
-	lw t5, (a3)
-	bne t5, s9, left_spot
-next_spot_two:
-	mul a5, a1, t4
-	sub a3, t3, a5
-	lw t5, (a3)
-	blt a3, a0, next_spot_five
-	bne t5, s9, top_spot
-next_spot_three:
-	#esse é no a5 pra não perder o top
-	sub a5, a3, t4
-	lw t5, (a5)
-	bne t5, s9, top_left_spot
-next_spot_four:
-	add a3, a3, t4
-	lw t5, (a3)
-	bne t5, s9, top_right_spot
-next_spot_five:
-	mul a5, a1, t4
-	add a3, t3, a5
-	lw t5, (a3)
-	bgt a3, a4, for_calcula_bombas
-	bne t5, s9, bottom_spot
-next_spot_six:
-	sub a5, a3, t4
-	lw t5, (a5)
-	bne t5, s9, bottom_left_spot
-next_spot_seven:
-	add a3, a3, t4
-	lw t5, (a3)
-	bne t5, s9, bottom_right_spot
-next_spot_eight:
-	j for_calcula_bombas
-	
-
-#POSIÇÕES
-right_spot:
-	#na função de verificação, fazemos os calculos para verificar se não se trata de um canto
-	bgt a3, a4, next_spot_one
-	div t6, a3, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, zero, next_spot_one
-	#após a verificação de canto aumentamos a contagem de bombas
-	add t5, t5, t0
-	sw t5, (a3)
-	#e voltamos para a próxima posição ao redor da bomba
-	j next_spot_one
-left_spot:
-	blt a3, a0, next_spot_two
-	div t6, a3, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, t0, next_spot_two
-	add t5, t5, t0
-	sw t5, (a3)
-	j next_spot_two
-top_spot:
-	add t5, t5, t0
-	sw t5, (a3)
-	j next_spot_three
-top_left_spot:
-	blt a5, a0, next_spot_four
-	div t6, a5, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, t0, next_spot_four
-	add t5, t5, t0
-	sw t5, (a5)
-	j next_spot_four
-top_right_spot:
-	bgt a3, a4, next_spot_five
-	div t6, a3, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, zero, next_spot_five
-	add t5, t5, t0
-	sw t5, (a5)
-	j next_spot_five
-bottom_spot:
-	add t5, t5, t0
-	sw t5, (a3)
-	j next_spot_six
-bottom_left_spot:
-	div t6, a5, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, t0, next_spot_seven
-	add t5, t5, t0
-	sw t5, (a5)
-	j next_spot_seven
-bottom_right_spot:
-	bgt a3, a4, next_spot_eight
-	div t6, a3, a0
-	div t6, t6, t4
-	rem t6, t6, a1 
-	beq t6, zero, next_spot_eight
-	add t5, t5, t0
-	sw t5, (a5)
-	j next_spot_eight
-					
-fim_calcula_bombas:
-	ret
-	
-	
-
-	
-############################################################
-#Implementaï¿½ï¿½o da funï¿½ï¿½o insere_bombas
-############################################################
-#     Algoritmo	
-#
-#  Salva registradores
-#  Carrega numero de sementes sorteadas = 15
-#  Le semente para funï¿½ï¿½o de numero pseudo randomico
-#  while (bombas < x) 
-#     sorteia linha
-#     sorteia coluna
-#     le posiï¿½ï¿½o pos = (L * tam + C) * 4
-#     if(pos != 9)
-#    	  grava posicao pos = 9
-#     bombas++  
-#
-############################################################
 INSERE_BOMBA:
-		la	t0, salva_S0
-		sw  	s0, 0 (t0)		# salva conteudo de s0 na memoria
-		la	t0, salva_ra
-		sw  	ra, 0 (t0)		# salva conteudo de ra na memoria
+	la	t0, salva_S0
+	sw  	s0, 0 (t0)		
+	la	t0, salva_ra
+	sw  	ra, 0 (t0)		
 		
-		add 	t0, zero, a0		# salva a0 em t0 - endereï¿½o da matriz campo
-		add 	t1, zero, a1		# salva a1 em t1 - quantidade de linhas 
+	add 	t0, zero, a0		
+	add 	t1, zero, a1		
 
 QTD_BOMBAS:
-		addi 	t2, zero, 15 		# seta para 15 bombas	
-		add 	t3, zero, zero 	# inicia contador de bombas com 0
-		addi 	a7, zero, 30 		# ecall 30 pega o tempo do sistema em milisegundos (usado como semente
-		ecall 				
-		add 	a1, zero, a0		# coloca a semente em a1
+	addi 	t2, zero, 15 		
+	add 	t3, zero, zero 	
+	addi 	a7, zero, 30 		
+	ecall 				
+	add 	a1, zero, a0		
 INICIO_LACO:
-		beq 	t2, t3, FIM_LACO
-		add 	a0, zero, t1 		# carrega limite para %	(resto da divisï¿½o)
-		jal 	PSEUDO_RAND
-		add 	t4, zero, a0		# pega linha sorteada e coloca em t4
-		add 	a0, zero, t1 		# carrega limite para % (resto da divisï¿½o)
-   		jal 	PSEUDO_RAND
-		add 	t5, zero, a0		# pega coluna sorteada e coloca em t5
-
-###############################################################################
-# imprime valores na tela (para debug somente) - retirar comentarios para ver
-#	
-#		li	a7, 4		# mostra texto "Posicao: "
-#		la	a0, posicao
-#		ecall
-#		
-#		li	a7, 1		
-#		add 	a0, zero, t3 	# imprime quantidade ja sorteada
-#		ecall		
-#
-#		li	a7, 4		# imrpime :
-#		la	a0, dois_pontos
-#		ecall
-#
-#		li	a7, 1
-#		add 	a0, zero, t4 	# imprime a linha sorteada	
-#		ecall
-#		
-#		li	a7, 4		# imrpime espaï¿½o
-#		la	a0, espaco
-#		ecall	
-#			
-#		li	a7, 1
-#		add 	a0, zero, t5 	# imprime coluna sorteada
-#		ecall
-#		
-##########################################################################	
-
+	beq 	t2, t3, FIM_LACO
+	add 	a0, zero, t1 		
+	jal 	PSEUDO_RAND
+	add 	t4, zero, a0		
+	add 	a0, zero, t1 		
+   	jal 	PSEUDO_RAND
+	add 	t5, zero, a0		
 LE_POSICAO:	
-		mul  	t4, t4, t1
-		add  	t4, t4, t5  		# calcula (L * tam) + C
-		add  	t4, t4, t4  		# multiplica por 2
-		add  	t4, t4, t4  		# multiplica por 4
-		add  	t4, t4, t0  		# calcula Base + deslocamento
-		lw   	t5, 0(t4)   		# Le posicao de memoria LxC
+	mul  	t4, t4, t1
+	add  	t4, t4, t5  		
+	add  	t4, t4, t4  		
+	add  	t4, t4, t4  		
+	add  	t4, t4, t0  		
+	lw   	t5, 0(t4)   		
 VERIFICA_BOMBA:		
-		addi 	t6, zero, 9		# se posiï¿½ï¿½o sorteada jï¿½ possui bomba
-		beq  	t5, t6, PULA_ATRIB	# pula atribuiï¿½ï¿½o 
-		sw   	t6, 0(t4)		# senï¿½o coloca 9 (bomba) na posiï¿½ï¿½o
-		addi 	t3, t3, 1		# incrementa quantidade de bombas sorteadas
+	addi 	t6, zero, 9		
+	beq  	t5, t6, PULA_ATRIB	
+	sw   	t6, 0(t4)		
+	addi 	t3, t3, 1		
 PULA_ATRIB:
-		j	INICIO_LACO
+	j	INICIO_LACO
 
-FIM_LACO:					# recupera registradores salvos
-		la	t0, salva_S0
-		lw  	s0, 0(t0)		# recupera conteudo de s0 da memï¿½ria
-		la	t0, salva_ra
-		lw  	ra, 0(t0)		# recupera conteudo de ra da memï¿½ria		
-		jr 	ra			# retorna para funcao que fez a chamada
-		
-##################################################################
-# PSEUDO_RAND
-# funï¿½ï¿½o que gera um nï¿½mero pseudo-randomico que serï¿½
-# usado para obter a posiï¿½ï¿½o da linha e coluna na matriz
-# entrada: a0 valor mï¿½ximo do resultado menos 1 
-#             (exemplo: a0 = 8 resultado entre 0 e 7)
-#          a1 para o nï¿½mero pseudo randomico 
-# saida: a0 valor pseudo randomico gerado
-#################################################################
-#int rand1(int lim, int semente) {
-#  static long a = semente; 
-#  a = (a * 125) % 2796203; 
-#  return (|a % lim|); 
-# }  
+FIM_LACO:					
+	la	t0, salva_S0
+	lw  	s0, 0(t0)		
+	la	t0, salva_ra
+	lw  	ra, 0(t0)		
+	jr 	ra			
 
 PSEUDO_RAND:
-		addi t6, zero, 125  		# carrega constante t6 = 125
-		lui  t5, 682			# carrega constante t5 = 2796203
-		addi t5, t5, 1697 		# 
-		addi t5, t5, 1034 		# 	
-		mul  a1, a1, t6			# a = a * 125
-		rem  a1, a1, t5			# a = a % 2796203
-		rem  a0, a1, a0			# a % lim
-		bge  a0, zero, EH_POSITIVO  	# testa se valor eh positivo
-		addi s2, zero, -1           	# caso nï¿½o 
-		mul  a0, a0, s2		    	# transforma em positivo
+	addi t6, zero, 125  		
+	lui  t5, 682			
+	addi t5, t5, 1697 		 
+	addi t5, t5, 1034 		 	
+	mul  a1, a1, t6			
+	rem  a1, a1, t5			
+	rem  a0, a1, a0			
+	bge  a0, zero, EH_POSITIVO  	
+	addi s2, zero, -1           	
+	mul  a0, a0, s2		    	
 EH_POSITIVO:	
-		ret				# retorna em a0 o valor obtido
+		ret
+
+calcula_bombas:
+    li s9, 9 # 9
+    add s7, s7, zero # 4
+    mul t1, a1, a1
+    mul t1, t1, s7
+    add t1, t1, a0
+    mv t0, a0 
+for_calcula_bombas:
+    beq t0, t1, fim_calcula_bombas
+    lw t3, (t0)
+    beq t3, s9, valida_bomba # if (vetor[i] == 9) 
+continua_for_calcula_bombas:
+    add t0, t0, s7 # incrementa for
+    j for_calcula_bombas
+valida_bomba:
+valida_direita:
+    add t4, t0, s7 # j = i + 1
+    lw t5, (t4) # vetor[j]
+    bne t5, s9, continua_valida_direita # vetor[j] != 9
+    j valida_esquerda 
+continua_valida_direita:
+    sub s5, t4, a0
+	div s5, s5, s7
+    rem t6, s5, a1 # j % lado
+    bne t6, zero, salva_valida_direita # j % 12 != 0
+    j valida_esquerda
+salva_valida_direita:
+    addi t5, t5, 1
+    sw t5, (t4)
+valida_esquerda:
+    sub t4, t0, s7 # j = i - 1
+    lw t5, (t4) # vetor[j]
+    bne t5, s9, continua_valida_esquerda
+    j valida_por_cima # vetor[j] != 9
+continua_valida_esquerda:
+    sub s5, t4, a0
+	div s5, s5, s7
+    rem t6, s5, a1 # j % 12
+    addi s5, a1, -1
+    bne t6, s5, salva_valida_esquerda # j % 12 != 11
+    j valida_por_cima
+salva_valida_esquerda:
+    addi t5, t5, 1
+    sw t5, (t4)
+valida_por_cima:
+    mul t6, a1, s7
+    sub t6, t0, t6 # aux = i - 12;
+    bgt t6, a0, valida_meio_cima
+    j valida_por_baixo
+valida_meio_cima:
+    lw t5, (t6)
+    bne t5, s9, continua_valida_por_cima
+    j valida_esquerda_cima # vetor[aux] != 9
+continua_valida_por_cima:
+    addi t5, t5, 1
+    sw t5, (t6)
+valida_esquerda_cima:
+    sub s1, t6, s7 # j = aux - 1
+    bgt s1, zero, continua_continua_valida_esquerda_cima
+    j valida_direita_cima
+continua_continua_valida_esquerda_cima:
+    lw t5, (s1)
+    bne t5, s9, continua_valida_esquerda_cima
+    j valida_direita_cima
+continua_valida_esquerda_cima:
+    addi s5, a1, -1
+    sub s8, s1, a0
+	div s8, s8, s7
+    rem s2, s8, a1
+    bne s2, s5, salva_valida_esquerda_cima
+    j valida_direita_cima
+salva_valida_esquerda_cima:
+    addi t5, t5, 1
+    sw t5, (s1)
+valida_direita_cima:
+    add s1, t6, s7 # j = aux + 1
+    lw t5, (s1)
+    bne t5, s9, continua_valida_direita_cima
+    j valida_por_baixo
+continua_valida_direita_cima:
+    sub s8, s1, a0
+	div s8, s8, s7
+    rem s2, s8, a1
+    bne s2, zero, salva_valida_direita_cima
+    j valida_por_baixo
+salva_valida_direita_cima:
+    addi t5, t5, 1
+    sw t5, (s1)
+valida_por_baixo:
+    mul t6, a1, s7
+    add t6, t0, t6 # aux = i + 12;
+    blt t6, t1, valida_meio_baixo
+    j continua_for_calcula_bombas
+valida_meio_baixo:
+    lw t5, (t6)
+    bne t5, s9, continua_valida_meio_baixo
+    j valida_esquerda_baixo # vetor[aux] != 9
+continua_valida_meio_baixo:
+    addi t5, t5, 1
+    sw t5, (t6)
+valida_esquerda_baixo:
+    sub s1, t6, s7 # j = aux - 1
+    lw t5, (s1)
+    bne t5, s9, continua_valida_esquerda_baixo
+    j valida_direita_baixo
+continua_valida_esquerda_baixo:
+    addi s5, a1, -1
+    sub s8, s1, a0
+	div s8, s8, s7
+    rem s2, s8, a1
+    bne s2, s5, salva_valida_esquerda_baixo
+    j valida_direita_baixo
+salva_valida_esquerda_baixo:
+    addi t5, t5, 1
+    sw t5, (s1)
+valida_direita_baixo:
+    add s1, t6, s7 # j = aux + 1
+    blt t1, s1, continua_for_calcula_bombas
+    lw t5, (s1)
+    bne t5, s9, continua_valida_direita_baixo
+    j continua_for_calcula_bombas
+continua_valida_direita_baixo:
+    sub s5, s1, a0
+	div s5, s5, s7
+    rem s2, s5, a1
+    bne s2, zero, salva_valida_direita_baixo
+    j continua_for_calcula_bombas
+salva_valida_direita_baixo:
+    addi t5, t5, 1
+    sw t5, (s1)
+    j continua_for_calcula_bombas
+fim_calcula_bombas:
+	mul s1, a1, a1
+    ret
